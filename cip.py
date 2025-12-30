@@ -8,6 +8,7 @@ def calculate_forward_rate(
 ) -> float:
     """
     Compute forward rate.
+    Where the forward rate is the amount of domestic currency per 1 unit of foreign currency to be exchanged at maturity.
 
     Parameters
     ----------
@@ -18,20 +19,20 @@ def calculate_forward_rate(
     days_to_maturity : int
         Number of days to maturity.
     spot_rate : float
-        Spot rate at time t.
+        Spot rate at present time.
 
     Returns
     -------
     float
-        Forward rate at time t.
+        Forward rate at present time.
 
     Examples
     --------
     >>> calculate_forward_rate(0.05, 0.02, 365, 1.0)
     1.0074
     """
-    # Assume ACT/365
-    tenor_years = days_to_maturity / 365 
+    # Assume ACT/360
+    tenor_years = days_to_maturity / 360
 
     # Domestic payoff (in domestic currency)
     domestic_rate_scaled = domestic_rate_annual * tenor_years
@@ -90,6 +91,7 @@ def does_cip_equality_hold(
 ) -> bool:
     """
     Check if CIP payoff equality holds for a given forward rate.
+    The payoffs in domestic currency terms at maturity should be equal.
 
     Parameters
     ----------
@@ -109,8 +111,8 @@ def does_cip_equality_hold(
     bool
         True if CIP payoff equality holds, False otherwise.
     """
-    # Assume ACT/365
-    tenor_years = days_to_maturity / 365 
+    # Assume ACT/360
+    tenor_years = days_to_maturity / 360
 
     # Domestic payoff (in domestic currency)
     domestic_rate_scaled = domestic_rate_annual * tenor_years
@@ -120,4 +122,6 @@ def does_cip_equality_hold(
     foreign_rate_scaled = foreign_rate_annual * tenor_years
     foreign_payoff_in_foreign_currency = (1 + foreign_rate_scaled) * (1 / spot_rate)
 
+    # CIP Payoff Equality (No-arbitrage condition)
+    # domestic_payoff == foreign_payoff_in_foreign_currency * forward_t
     return abs(domestic_payoff - (foreign_payoff_in_foreign_currency * forward_rate)) < 1e-10
